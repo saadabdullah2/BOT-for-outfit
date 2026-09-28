@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+chromadb
+google-generativeai
+langchain-google-genai
+langchain 
+beautifulsoup4 
+requests 
+python-dotenv
+sentence-transformers
+torch

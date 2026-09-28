@@ -1,0 +1,360 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .quiz-wrap { padding: 1.5rem 0; max-width: 680px; margin: 0 auto; }
+  .brand-header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .brand-name { font-size: 11px; letter-spacing: 0.2em; color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: 6px; }
+  .quiz-title { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+  .quiz-sub { font-size: 14px; color: var(--color-text-secondary); margin-top: 6px; }
+  .progress-bar-wrap { margin-bottom: 2rem; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .progress-bar { height: 2px; background: var(--color-border-tertiary); border-radius: 2px; }
+  .progress-fill { height: 100%; border-radius: 2px; background: var(--color-text-primary); transition: width 0.4s ease; }
+  .question-block { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .q-label { font-size: 11px; letter-spacing: 0.15em; color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: 8px; }
+  .q-text { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1.5rem; line-height: 1.4; }
+  .options-grid { display: grid; gap: 10px; }
+  .options-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .option-btn { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 14px 18px; text-align: left; cursor: pointer; transition: all 0.15s ease; color: var(--color-text-primary); font-size: 14px; font-family: var(--font-sans); }
+  .option-btn:hover { border-color: var(--color-border-primary); background: var(--color-background-secondary); }
+  .option-btn.selected { border: 1.5px solid var(--color-text-primary); background: var(--color-background-secondary); font-weight: 500; }
+  .option-btn .opt-icon { font-size: 16px; margin-bottom: 4px; display: block; }
+  .option-btn .opt-label { display: block; font-weight: 500; font-size: 14px; }
+  .option-btn .opt-sub { display: block; font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.75rem; }
+  .btn-back { background: none; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 9px 20px; color: var(--color-text-secondary); font-size: 14px; cursor: pointer; font-family: var(--font-sans); }
+  .btn-back:hover { border-color: var(--color-border-primary); color: var(--color-text-primary); }
+  .btn-next { background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-md); padding: 10px 28px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); transition: opacity 0.15s; }
+  .btn-next:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-next:not(:disabled):hover { opacity: 0.85; }
+  .result-block { animation: fadeIn 0.4s ease; }
+  .result-header { text-align: center; padding: 1.5rem; background: var(--color-background-secondary); border-radius: var(--border-radius-lg); margin-bottom: 1.5rem; }
+  .result-icon { font-size: 32px; margin-bottom: 8px; }
+  .result-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+  .result-sub { font-size: 13px; color: var(--color-text-secondary); }
+  .session-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .session-title { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px; letter-spacing: 0.05em; }
+  .session-data { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; word-break: break-all; }
+  .session-row { display: flex; gap: 8px; font-size: 13px; margin-bottom: 6px; }
+  .session-key { color: var(--color-text-secondary); min-width: 130px; flex-shrink: 0; }
+  .session-val { color: var(--color-text-primary); font-weight: 500; }
+  .btn-recommend { width: 100%; background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-lg); padding: 14px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); margin-top: 0.5rem; transition: opacity 0.15s; }
+  .btn-recommend:hover { opacity: 0.85; }
+  .btn-restart { width: 100%; background: none; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 12px; font-size: 14px; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); margin-top: 8px; }
+  .btn-restart:hover { border-color: var(--color-border-primary); color: var(--color-text-primary); }
+  .tag-pill { display: inline-block; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--color-text-secondary); margin: 3px; }
+  .loading-dots { display: flex; gap: 6px; justify-content: center; margin: 2rem 0; }
+  .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--color-border-primary); animation: dot 1.2s infinite; }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
+  .rec-list { display: grid; gap: 10px; }
+  .rec-card { display: flex; gap: 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px; align-items: flex-start; }
+  .rec-img { width: 60px; height: 70px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); object-fit: cover; flex-shrink: 0; }
+  .rec-info { flex: 1; min-width: 0; }
+  .rec-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rec-price { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .rec-score { font-size: 11px; color: var(--color-text-secondary); }
+  .rec-link { font-size: 12px; color: var(--color-text-primary); text-decoration: none; margin-top: 4px; display: inline-block; }
+  .status-msg { text-align: center; padding: 1rem; font-size: 14px; color: var(--color-text-secondary); }
+  .error-msg { color: var(--color-text-danger); font-size: 13px; text-align: center; padding: 0.5rem; }
+</style>
+
+<div class="quiz-wrap">
+  <div class="brand-header">
+    <div class="brand-name">Beyond East</div>
+    <div class="quiz-title">Find your perfect suit</div>
+    <div class="quiz-sub">Answer a few questions and we'll match you with the right collection</div>
+  </div>
+
+  <div id="quiz-screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span id="q-counter">Question 1 of 7</span>
+        <span id="q-pct">14%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width: 14%"></div></div>
+    </div>
+    <div id="question-area"></div>
+  </div>
+
+  <div id="result-screen" style="display:none;"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    id: "occasion",
+    label: "Occasion",
+    text: "What's the occasion you're shopping for?",
+    cols: 2,
+    options: [
+      { value: "everyday casual", label: "Everyday wear", sub: "Office, errands, casual outings", icon: "☀" },
+      { value: "festive eid wedding", label: "Festive & eid", sub: "Celebrations, dawats, formal events", icon: "✦" },
+      { value: "formal work", label: "Work & formal", sub: "Professional, meetings", icon: "◈" },
+      { value: "party mehndi", label: "Party & mehndi", sub: "Weddings, functions, events", icon: "◆" }
+    ]
+  },
+  {
+    id: "style",
+    label: "Style",
+    text: "How would you describe your personal style?",
+    cols: 2,
+    options: [
+      { value: "classic traditional embroidered", label: "Classic & traditional", sub: "Timeless, elegant, rooted", icon: "❖" },
+      { value: "modern minimal solid", label: "Modern & minimal", sub: "Clean lines, understated", icon: "◻" },
+      { value: "bold printed colorful", label: "Bold & expressive", sub: "Prints, colour, statement pieces", icon: "◉" },
+      { value: "fusion contemporary trendy", label: "Fusion & trendy", sub: "East meets West, experimental", icon: "✿" }
+    ]
+  },
+  {
+    id: "fabric",
+    label: "Fabric preference",
+    text: "What fabric do you prefer?",
+    cols: 2,
+    options: [
+      { value: "lawn cotton breathable summer", label: "Lawn / cotton", sub: "Light, breathable, everyday", icon: "⊕" },
+      { value: "chiffon organza elegant", label: "Chiffon / organza", sub: "Flowy, feminine, festive", icon: "◌" },
+      { value: "khaddar linen winter warm", label: "Khaddar / linen", sub: "Warm, textured, winter", icon: "▦" },
+      { value: "velvet raw silk luxury", label: "Velvet / raw silk", sub: "Rich, luxurious, premium", icon: "◈" }
+    ]
+  },
+  {
+    id: "pieces",
+    label: "Suit type",
+    text: "Do you prefer stitched (pret) or unstitched suits?",
+    cols: 2,
+    options: [
+      { value: "pret ready to wear stitched", label: "Pret (ready-to-wear)", sub: "Ready stitched, buy and wear", icon: "✓" },
+      { value: "unstitched fabric", label: "Unstitched fabric", sub: "Get it stitched your way", icon: "✂" },
+      { value: "2 piece suit", label: "2-piece", sub: "Shirt + trousers or dupatta", icon: "②" },
+      { value: "3 piece suit dupatta", label: "3-piece", sub: "Complete set with dupatta", icon: "③" }
+    ]
+  },
+  {
+    id: "color",
+    label: "Colour palette",
+    text: "Which colour palette speaks to you?",
+    cols: 2,
+    options: [
+      { value: "neutral beige ivory white cream", label: "Neutrals", sub: "Beige, ivory, off-white, cream", icon: "○" },
+      { value: "pastels pink lilac mint soft", label: "Pastels", sub: "Soft pink, lilac, mint", icon: "◎" },
+      { value: "jewel tones emerald navy maroon", label: "Jewel tones", sub: "Deep emerald, navy, maroon", icon: "◆" },
+      { value: "vibrant bold red orange yellow", label: "Vibrant & bold", sub: "Bright, eye-catching colours", icon: "◉" }
+    ]
+  },
+  {
+    id: "season",
+    label: "Season",
+    text: "Which season are you shopping for?",
+    cols: 2,
+    options: [
+      { value: "summer spring lawn cotton light", label: "Spring / summer", sub: "Light fabrics, bright colours", icon: "⊙" },
+      { value: "winter khaddar karandi warm", label: "Autumn / winter", sub: "Warm, heavier fabrics", icon: "❄" },
+      { value: "all season year round", label: "All seasons", sub: "Versatile wardrobe staples", icon: "◑" },
+      { value: "festive eid wedding", label: "Festive season", sub: "Eid, weddings, celebrations", icon: "✦" }
+    ]
+  },
+  {
+    id: "budget",
+    label: "Budget",
+    text: "What's your budget range per suit?",
+    cols: 2,
+    options: [
+      { value: "affordable budget under 3000", label: "Under PKR 3,000", sub: "Budget-friendly picks", icon: "◇" },
+      { value: "mid range 3000 6000", label: "PKR 3,000 – 6,000", sub: "Great value, quality pieces", icon: "◈" },
+      { value: "premium 6000 10000", label: "PKR 6,000 – 10,000", sub: "Premium selection", icon: "◆" },
+      { value: "luxury above 10000", label: "PKR 10,000+", sub: "Luxury & festive collection", icon: "✦" }
+    ]
+  }
+];
+
+let current = 0;
+let answers = {};
+let sessionId = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+let selectedOption = null;
+
+function renderQuestion() {
+  const q = questions[current];
+  const total = questions.length;
+  const pct = Math.round(((current + 1) / total) * 100);
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('q-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+
+  const saved = answers[q.id] || null;
+  selectedOption = saved;
+
+  const colsClass = q.cols === 2 ? 'cols-2' : '';
+  const optionsHTML = q.options.map(o => `
+    <button class="option-btn ${saved === o.value ? 'selected' : ''}" data-value="${o.value}" onclick="selectOption(this, '${o.value}')">
+      <span class="opt-icon">${o.icon}</span>
+      <span class="opt-label">${o.label}</span>
+      <span class="opt-sub">${o.sub}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('question-area').innerHTML = `
+    <div class="question-block">
+      <div class="q-label">${q.label}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options-grid ${colsClass}">${optionsHTML}</div>
+      <div class="nav-row">
+        ${current > 0 ? `<button class="btn-back" onclick="goBack()">Back</button>` : `<span></span>`}
+        <button class="btn-next" id="btn-next" onclick="goNext()" ${!saved ? 'disabled' : ''}>
+          ${current === total - 1 ? 'See my recommendations ↗' : 'Next'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function selectOption(el, value) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOption = value;
+  answers[questions[current].id] = value;
+  document.getElementById('btn-next').disabled = false;
+}
+
+function goNext() {
+  if (!selectedOption) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function goBack() {
+  if (current > 0) {
+    current--;
+    renderQuestion();
+  }
+}
+
+function buildSearchQuery() {
+  return Object.values(answers).join(' ');
+}
+
+function showResult() {
+  const sessionData = {
+    session_id: sessionId,
+    created_at: new Date().toISOString(),
+    answers: answers,
+    search_query: buildSearchQuery()
+  };
+
+  // Save to in-memory store (replace with DB call)
+  window._quizSessions = window._quizSessions || {};
+  window._quizSessions[sessionId] = sessionData;
+
+  document.getElementById('quiz-screen').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+
+  const answerRows = Object.entries(answers).map(([k, v]) => {
+    const q = questions.find(q => q.id === k);
+    const opt = q?.options.find(o => o.value === v);
+    return `<div class="session-row"><span class="session-key">${q?.label || k}</span><span class="session-val">${opt?.label || v}</span></div>`;
+  }).join('');
+
+  rs.innerHTML = `
+    <div class="result-block">
+      <div class="result-header">
+        <div class="result-icon">✦</div>
+        <div class="result-title">Your style profile is ready</div>
+        <div class="result-sub">Session ID: ${sessionId}</div>
+      </div>
+
+      <div class="session-card">
+        <div class="session-title">Your preferences</div>
+        ${answerRows}
+      </div>
+
+      <div class="session-card" style="margin-bottom: 1rem;">
+        <div class="session-title">Search query for recommendations API</div>
+        <div class="session-data">${buildSearchQuery()}</div>
+      </div>
+
+      <button class="btn-recommend" onclick="fetchRecommendations()">
+        Find matching suits ↗
+      </button>
+      <button class="btn-restart" onclick="restartQuiz()">Start over</button>
+
+      <div id="rec-result" style="margin-top: 1.5rem;"></div>
+    </div>
+  `;
+}
+
+async function fetchRecommendations() {
+  const recDiv = document.getElementById('rec-result');
+  recDiv.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div><div class="status-msg">Finding your matches...</div>`;
+
+  const payload = {
+    answers: answers,
+    collection_name: "products",
+    top_k: 6
+  };
+
+  try {
+    const res = await fetch('http://localhost:8000/quiz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+
+    if (!data.recommendations || data.recommendations.length === 0) {
+      recDiv.innerHTML = `<div class="status-msg">No recommendations found. Make sure the products are scraped first via <code>/scrape</code>.</div>`;
+      return;
+    }
+
+    const cards = data.recommendations.map(r => {
+      const score = Math.round((r.similarity_score || 0) * 100);
+      const imgEl = r.image_url ? `<img class="rec-img" src="${r.image_url}" alt="${r.name}" onerror="this.style.display='none'">` : `<div class="rec-img"></div>`;
+      return `
+        <div class="rec-card">
+          ${imgEl}
+          <div class="rec-info">
+            <div class="rec-name">${r.name || 'Unnamed product'}</div>
+            <div class="rec-price">${r.price || ''}</div>
+            <div class="rec-score">Match: ${score}%</div>
+            ${r.url ? `<a class="rec-link" href="${r.url}" target="_blank">View product →</a>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    recDiv.innerHTML = `
+      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">${data.count} suits matched for you</div>
+      <div class="rec-list">${cards}</div>
+    `;
+  } catch (err) {
+    recDiv.innerHTML = `
+      <div class="error-msg">Could not connect to the recommendation API (localhost:8000).<br>Make sure the FastAPI server is running.</div>
+      <div class="session-card" style="margin-top: 1rem;">
+        <div class="session-title">Payload ready to send</div>
+        <div class="session-data">${JSON.stringify(payload, null, 2)}</div>
+      </div>
+    `;
+  }
+}
+
+function restartQuiz() {
+  current = 0;
+  answers = {};
+  selectedOption = null;
+  sessionId = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
